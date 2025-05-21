@@ -1,0 +1,47 @@
+name: Test Execution Path Action
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test-execution-path:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare test data
+        run: |
+          echo '{
+              "A": [
+                "package.json",
+                "utils/commands.sh",
+                "utils/console-test.txt"
+              ],
+              "M": [
+                "tf/backends.tf",
+                "tf/data.tf",
+                "tf/locals.tf",
+                "tf/main.tf",
+                "tf/providers.tf",
+                "tf/terraform.tfvars",
+                "tf/variables.tf"
+              ],
+              "D": []
+            }' > repo-changes.json
+
+          echo '{
+              "lambda-python": false,
+              "lambda-js": false,
+              "lambda-ts": false,
+              "glue-python": false,
+              "state-machine": false,
+              "lambda-layer-python": false,
+              "lambda-layer-js": false,
+              "lambda-layer-ts": false
+            }' > services-used.json
+
+      - uses: ./
+        with:
+          files-modified: 'repo-changes.json'
+          services-used: 'services-used.json'
