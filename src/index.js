@@ -57,7 +57,7 @@ async function main() {
     fs.writeFileSync(outputFilePath, JSON.stringify(output, null, 2));
 
     // Upload artifact
-    const artifactClient = artifact.getDefaultClient();
+    const artifactClient = artifact.create();
     await artifactClient.uploadArtifact(
       "execution-path",
       [outputFilePath],
