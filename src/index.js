@@ -1,5 +1,6 @@
 const core = require("@actions/core");
 const fs = require("fs");
+const artifact = require("@actions/artifact");
 
 try {
   const modifiedPath = core.getInput("files-modified");
@@ -50,6 +51,16 @@ try {
 
   core.setOutput("execution-path", output);
 
+    // Save to file
+    const outputFilePath = "execution-path.json";
+    fs.writeFileSync(outputFilePath, JSON.stringify(output, null, 2));
+  
+    // Upload artifact
+    const artifactClient = artifact.create();
+    artifactClient.uploadArtifact("execution-path", [outputFilePath], ".", {
+      continueOnError: false,
+    });
+    
   // Generate markdown table for GitHub Step Summary
   let summary = `### 📋 Execution Path\n\n`;
   summary += `| Service         | Execute |\n`;
