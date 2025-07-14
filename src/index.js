@@ -56,7 +56,8 @@ try {
     fs.writeFileSync(outputFilePath, JSON.stringify(output, null, 2));
   
     // Upload artifact
-    const artifactClient = artifact.create();
+    const artifactClient = artifact.getDefaultClient(); 
+
     artifactClient.uploadArtifact("execution-path", [outputFilePath], ".", {
       continueOnError: false,
     });
