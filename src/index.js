@@ -1,6 +1,6 @@
 const core = require("@actions/core");
 const fs = require("fs");
-const artifact = require("@actions/artifact");
+const { uploadArtifact } = require("@actions/artifact");
 
 async function main() {
   try {
@@ -22,9 +22,7 @@ async function main() {
         .filter((dir) => allMonitoredDirs.includes(dir))
     );
 
-    core.info(
-      `Top-level directories found: ${JSON.stringify([...topLevelDirs])}`
-    );
+    core.info(`Top-level directories found: ${JSON.stringify([...topLevelDirs])}`);
 
     const output = {
       IaC: false,
@@ -56,14 +54,8 @@ async function main() {
     const outputFilePath = "execution-path.json";
     fs.writeFileSync(outputFilePath, JSON.stringify(output, null, 2));
 
-    // Upload artifact
-    const artifactClient = artifact.create();
-    await artifactClient.uploadArtifact(
-      "execution-path",
-      [outputFilePath],
-      ".",
-      { continueOnError: false }
-    );
+    // Upload artifact using the modern API
+    await uploadArtifact("execution-path", [outputFilePath], ".");
 
     // Generate markdown table for GitHub Step Summary
     let summary = `### 📋 Execution Path\n\n`;
@@ -80,10 +72,7 @@ async function main() {
     if (summaryPath) {
       fs.appendFileSync(summaryPath, summary);
     } else {
-      console.log(
-        "GITHUB_STEP_SUMMARY is not defined. Here's the output:\n",
-        summary
-      );
+      console.log("GITHUB_STEP_SUMMARY is not defined. Here's the output:\n", summary);
     }
   } catch (error) {
     core.setFailed(error.message);
