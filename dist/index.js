@@ -30985,7 +30985,9 @@ async function main() {
     const artifactClient = artifact.create();
 
     const artifactName = "execution-path";
-    await artifactClient.uploadArtifact(artifactName, ["execution-path.json"], ".");
+    await artifactClient.uploadArtifact(artifactName, ["execution-path.json"], ".", {
+      continueOnError: true
+    });
 
     // Generate markdown table for GitHub Step Summary
     let summary = `### 📋 Execution Path\n\n`;
