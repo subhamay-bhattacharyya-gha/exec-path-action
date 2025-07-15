@@ -8,7 +8,6 @@
     "release": "semantic-release"
   },
   "dependencies": {
-    "@actions/artifact": "^1.1.2",
     "@actions/core": "^1.10.0",
     "@actions/github": "^6.0.0"
   },

@@ -1,6 +1,5 @@
 const core = require("@actions/core");
 const fs = require("fs");
-const artifact = require("@actions/artifact");
 
 
 async function main() {
@@ -56,30 +55,12 @@ async function main() {
     fs.writeFileSync(outputFilePath, JSON.stringify(output, null, 2));
 
 
-    // Save data as output first (this always works)
+    // Save data as output (this always works)
     const fileContent = fs.readFileSync(outputFilePath, 'utf8');
     core.setOutput('execution-path-json', fileContent);
     core.info('Execution path data saved as step output');
-    
-    // Try artifact upload as optional feature
-    try {
-      const artifactClient = artifact.create();
-      const artifactName = 'execution-path-data';
-      
-      core.info(`Attempting artifact upload with name: ${artifactName}`);
-      
-      const response = await artifactClient.uploadArtifact(
-        artifactName, 
-        [outputFilePath], 
-        "."
-      );
-      core.info(`✅ Artifact uploaded successfully: ${artifactName} (${response.size} bytes)`);
-      
-    } catch (artifactError) {
-      // Don't fail the action if artifact upload fails
-      core.warning(`Artifact upload failed (this is optional): ${artifactError.message}`);
-      core.info('💡 The execution path data is still available via step outputs');
-    }
+    core.info(`📁 File created: ${outputFilePath}`);
+    core.info('💡 Use the upload-artifact action to upload the file if needed');
 
     // Generate markdown table for GitHub Step Summary
     let summary = `### 📋 Execution Path\n\n`;
