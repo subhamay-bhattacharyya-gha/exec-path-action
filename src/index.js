@@ -56,43 +56,29 @@ async function main() {
     fs.writeFileSync(outputFilePath, JSON.stringify(output, null, 2));
 
 
-    // Check if artifact upload is supported in this context
-    const isInGitHubActions = process.env.GITHUB_ACTIONS === 'true';
-    const hasArtifactToken = process.env.ACTIONS_RUNTIME_TOKEN !== undefined;
+    // Save data as output first (this always works)
+    const fileContent = fs.readFileSync(outputFilePath, 'utf8');
+    core.setOutput('execution-path-json', fileContent);
+    core.info('Execution path data saved as step output');
     
-    if (!isInGitHubActions) {
-      core.info('Not running in GitHub Actions, skipping artifact upload');
-      return;
-    }
-    
-    if (!hasArtifactToken) {
-      core.warning('No artifact token available, skipping artifact upload');
-      return;
-    }
-
-    // Upload artifact using @actions/artifact v1
-    const artifactClient = artifact.create();
-    const artifactName = "data";  // Most basic name possible
-    
-    // Verify file exists before upload
-    if (!fs.existsSync(outputFilePath)) {
-      core.warning(`File ${outputFilePath} does not exist, skipping artifact upload`);
-      return;
-    }
-    
-    core.info(`Attempting to upload artifact with name: ${artifactName}`);
-    core.info(`File to upload: ${outputFilePath}`);
-    core.info(`File size: ${fs.statSync(outputFilePath).size} bytes`);
-    
+    // Try artifact upload as optional feature
     try {
+      const artifactClient = artifact.create();
+      const artifactName = 'execution-path-data';
+      
+      core.info(`Attempting artifact upload with name: ${artifactName}`);
+      
       const response = await artifactClient.uploadArtifact(
         artifactName, 
         [outputFilePath], 
         "."
       );
-      core.info(`Artifact ${artifactName} uploaded successfully. Size: ${response.size} bytes`);
-    } catch (error) {
-      core.warning(`Failed to upload artifact: ${error.message}`);
+      core.info(`✅ Artifact uploaded successfully: ${artifactName} (${response.size} bytes)`);
+      
+    } catch (artifactError) {
+      // Don't fail the action if artifact upload fails
+      core.warning(`Artifact upload failed (this is optional): ${artifactError.message}`);
+      core.info('💡 The execution path data is still available via step outputs');
     }
 
     // Generate markdown table for GitHub Step Summary

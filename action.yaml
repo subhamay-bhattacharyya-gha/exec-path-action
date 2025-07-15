@@ -12,7 +12,9 @@ inputs:
 outputs:
   execution-path:
     description: 'Execution path based on files modified and services used'
+  execution-path-json:
+    description: 'JSON string containing the execution path data'
 
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/index.js'
