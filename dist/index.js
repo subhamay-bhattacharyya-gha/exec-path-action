@@ -30982,9 +30982,23 @@ async function main() {
     fs.writeFileSync(outputFilePath, JSON.stringify(output, null, 2));
 
 
+    // Check if artifact upload is supported in this context
+    const isInGitHubActions = process.env.GITHUB_ACTIONS === 'true';
+    const hasArtifactToken = process.env.ACTIONS_RUNTIME_TOKEN !== undefined;
+    
+    if (!isInGitHubActions) {
+      core.info('Not running in GitHub Actions, skipping artifact upload');
+      return;
+    }
+    
+    if (!hasArtifactToken) {
+      core.warning('No artifact token available, skipping artifact upload');
+      return;
+    }
+
     // Upload artifact using @actions/artifact v1
     const artifactClient = artifact.create();
-    const artifactName = "results";
+    const artifactName = "data";  // Most basic name possible
     
     // Verify file exists before upload
     if (!fs.existsSync(outputFilePath)) {
@@ -30992,14 +31006,15 @@ async function main() {
       return;
     }
     
+    core.info(`Attempting to upload artifact with name: ${artifactName}`);
+    core.info(`File to upload: ${outputFilePath}`);
+    core.info(`File size: ${fs.statSync(outputFilePath).size} bytes`);
+    
     try {
       const response = await artifactClient.uploadArtifact(
         artifactName, 
         [outputFilePath], 
-        ".",
-        {
-          continueOnError: false
-        }
+        "."
       );
       core.info(`Artifact ${artifactName} uploaded successfully. Size: ${response.size} bytes`);
     } catch (error) {
