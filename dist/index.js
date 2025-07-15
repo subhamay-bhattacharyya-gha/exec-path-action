@@ -30982,12 +30982,20 @@ async function main() {
     fs.writeFileSync(outputFilePath, JSON.stringify(output, null, 2));
 
 
+    // Upload artifact using @actions/artifact v1
     const artifactClient = artifact.create();
-
-    const artifactName = "execution-path";
-    await artifactClient.uploadArtifact(artifactName, ["execution-path.json"], ".", {
-      continueOnError: true
-    });
+    const artifactName = "execution_path";
+    
+    try {
+      const uploadResponse = await artifactClient.uploadArtifact(
+        artifactName, 
+        ["execution-path.json"], 
+        "."
+      );
+      core.info(`Artifact ${artifactName} uploaded successfully. Size: ${uploadResponse.size} bytes`);
+    } catch (error) {
+      core.warning(`Failed to upload artifact: ${error.message}`);
+    }
 
     // Generate markdown table for GitHub Step Summary
     let summary = `### 📋 Execution Path\n\n`;
