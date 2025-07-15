@@ -30982,7 +30982,8 @@ async function main() {
     fs.writeFileSync(outputFilePath, JSON.stringify(output, null, 2));
 
 
-    // Upload artifact using @actions/artifact v2
+    // Upload artifact using @actions/artifact v1
+    const artifactClient = artifact.create();
     const artifactName = "results";
     
     // Verify file exists before upload
@@ -30992,12 +30993,15 @@ async function main() {
     }
     
     try {
-      const { id, size } = await artifact.uploadArtifact(
+      const response = await artifactClient.uploadArtifact(
         artifactName, 
         [outputFilePath], 
-        process.cwd()
+        ".",
+        {
+          continueOnError: false
+        }
       );
-      core.info(`Artifact ${artifactName} uploaded successfully. ID: ${id}, Size: ${size} bytes`);
+      core.info(`Artifact ${artifactName} uploaded successfully. Size: ${response.size} bytes`);
     } catch (error) {
       core.warning(`Failed to upload artifact: ${error.message}`);
     }
