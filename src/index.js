@@ -1,6 +1,7 @@
 const core = require("@actions/core");
 const fs = require("fs");
-const { uploadArtifact } = require("@actions/artifact");
+const artifact = require("@actions/artifact");
+
 
 async function main() {
   try {
@@ -54,8 +55,10 @@ async function main() {
     const outputFilePath = "execution-path.json";
     fs.writeFileSync(outputFilePath, JSON.stringify(output, null, 2));
 
-    // Upload artifact using the modern API
-    await uploadArtifact("execution-path", [outputFilePath], ".");
+
+    const artifactClient = artifact.create();
+
+    await artifactClient.uploadArtifact("execution-path", ["execution-path.json"], ".");
 
     // Generate markdown table for GitHub Step Summary
     let summary = `### 📋 Execution Path\n\n`;
