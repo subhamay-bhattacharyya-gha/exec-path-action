@@ -56,17 +56,22 @@ async function main() {
     fs.writeFileSync(outputFilePath, JSON.stringify(output, null, 2));
 
 
-    // Upload artifact using @actions/artifact v1
-    const artifactClient = artifact.create();
-    const artifactName = "execution_path";
+    // Upload artifact using @actions/artifact v2
+    const artifactName = "results";
+    
+    // Verify file exists before upload
+    if (!fs.existsSync(outputFilePath)) {
+      core.warning(`File ${outputFilePath} does not exist, skipping artifact upload`);
+      return;
+    }
     
     try {
-      const uploadResponse = await artifactClient.uploadArtifact(
+      const { id, size } = await artifact.uploadArtifact(
         artifactName, 
-        ["execution-path.json"], 
-        "."
+        [outputFilePath], 
+        process.cwd()
       );
-      core.info(`Artifact ${artifactName} uploaded successfully. Size: ${uploadResponse.size} bytes`);
+      core.info(`Artifact ${artifactName} uploaded successfully. ID: ${id}, Size: ${size} bytes`);
     } catch (error) {
       core.warning(`Failed to upload artifact: ${error.message}`);
     }
